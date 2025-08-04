@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth'
-import { useJobStore, type JobOffer } from '../stores/jobs'
+import { useAuthStore } from '@/stores/auth'
+import { useJobStore, type JobOffer } from '@/stores/jobs'
 
 const authStore = useAuthStore()
 const jobStore = useJobStore()
