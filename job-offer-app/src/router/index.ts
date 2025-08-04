@@ -31,6 +31,12 @@ const router = createRouter({
           component: () => import('../views/InstallerDashboard.vue')
         },
         {
+          path: '/job/:jobId',
+          name: 'job-details',
+          component: () => import('../views/JobDetails.vue'),
+          props: true
+        },
+        {
           path: '/calendar',
           name: 'calendar',
           component: () => import('../views/CalendarView.vue')

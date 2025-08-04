@@ -27,7 +27,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 44px; /* Minimum touch target size */
+  min-height: 44px;
+  /* Minimum touch target size */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -112,7 +113,8 @@
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   font-size: 1rem;
-  min-height: 44px; /* Minimum touch target size */
+  min-height: 44px;
+  /* Minimum touch target size */
 }
 
 .form-input:focus {
@@ -274,8 +276,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Tablet and larger screens */
@@ -284,7 +291,7 @@
     max-width: 768px;
     padding: 2rem;
   }
-  
+
   .nav-bottom {
     position: static;
     border-top: none;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
-import { useJobStore } from '../stores/jobs'
+import { useJobStore, type JobOffer } from '../stores/jobs'
 
 const authStore = useAuthStore()
 const jobStore = useJobStore()
@@ -9,9 +9,20 @@ const jobStore = useJobStore()
 const currentDate = ref(new Date())
 
 const scheduledJobs = computed(() => {
-  if (authStore.user?.id) {
-    return jobStore.getJobsForInstaller(authStore.user.id)
-      .filter(job => job.status === 'accepted' || job.status === 'in_progress')
+  if (authStore.userType === 'installer' && authStore.user?.id) {
+    // For installers: show their assigned jobs (accepted/in_progress) + all pending jobs they could accept
+    const assignedJobs = jobStore.getJobsForInstaller(authStore.user.id)
+      .filter(job => job.scheduledDate && (job.status === 'accepted' || job.status === 'in_progress'))
+    
+    const availableJobs = jobStore.pendingJobs
+      .filter(job => job.scheduledDate && !job.installerId)
+    
+    return [...assignedJobs, ...availableJobs]
+      .sort((a, b) => (a.scheduledDate?.getTime() || 0) - (b.scheduledDate?.getTime() || 0))
+  } else if (authStore.userType === 'client' && authStore.user?.id) {
+    return jobStore.getJobsForClient(authStore.user.id)
+      .filter(job => job.scheduledDate)
+      .sort((a, b) => (a.scheduledDate?.getTime() || 0) - (b.scheduledDate?.getTime() || 0))
   }
   return []
 })
@@ -35,14 +46,38 @@ const calendarDays = computed(() => {
   const currentDateObj = new Date(startDate)
   
   for (let i = 0; i < 42; i++) {
+    // Get all jobs for the current day based on user type
+    let dayJobs: JobOffer[] = []
+    if (authStore.userType === 'installer' && authStore.user?.id) {
+      // For installers: show their assigned jobs + available pending jobs
+      const assignedJobs = jobStore.getJobsForInstaller(authStore.user.id)
+        .filter(job => job.scheduledDate && 
+          job.scheduledDate.toDateString() === currentDateObj.toDateString() &&
+          (job.status === 'accepted' || job.status === 'in_progress'))
+      
+      const availableJobs = jobStore.pendingJobs
+        .filter(job => job.scheduledDate && 
+          job.scheduledDate.toDateString() === currentDateObj.toDateString() &&
+          !job.installerId)
+      
+      dayJobs = [...assignedJobs, ...availableJobs]
+    } else if (authStore.userType === 'client' && authStore.user?.id) {
+      // For clients: show all their jobs regardless of status
+      dayJobs = jobStore.getJobsForClient(authStore.user.id)
+        .filter(job => job.scheduledDate && 
+          job.scheduledDate.toDateString() === currentDateObj.toDateString())
+    } else {
+      // Fallback: show all jobs with scheduled dates (for debugging)
+      dayJobs = jobStore.jobs
+        .filter(job => job.scheduledDate && 
+          job.scheduledDate.toDateString() === currentDateObj.toDateString())
+    }
+    
     const day = {
       date: new Date(currentDateObj),
       isCurrentMonth: currentDateObj.getMonth() === month,
       isToday: currentDateObj.toDateString() === new Date().toDateString(),
-      jobs: scheduledJobs.value.filter(job => 
-        job.scheduledDate && 
-        job.scheduledDate.toDateString() === currentDateObj.toDateString()
-      )
+      jobs: dayJobs
     }
     days.push(day)
     currentDateObj.setDate(currentDateObj.getDate() + 1)
@@ -65,6 +100,12 @@ function goToToday() {
 
 onMounted(() => {
   jobStore.loadFromStorage()
+  
+  // Debug: Log jobs to see what's available
+  console.log('All jobs:', jobStore.jobs)
+  console.log('Scheduled jobs:', scheduledJobs.value)
+  console.log('Current user:', authStore.user)
+  console.log('User type:', authStore.userType)
 })
 </script>
 
@@ -128,14 +169,21 @@ onMounted(() => {
               v-for="job in day.jobs.slice(0, 2)" 
               :key="job.id"
               :class="[
-                'text-xs p-1 rounded text-white truncate',
-                job.status === 'accepted' ? 'bg-yellow-500' : 'bg-green-500'
+                'text-xs p-1 rounded font-bold',
+                job.status === 'pending' ? 'bg-yellow-500' : 
+                job.status === 'accepted' ? 'bg-blue-700' : 
+                job.status === 'in_progress' ? 'bg-green-700' : 'bg-gray-700'
               ]"
-              :title="job.title"
+              :title="`${job.title} - ${job.scheduledDate ? job.scheduledDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''}`"
             >
-              {{ job.title }}
+              <div class="font-black text-white" style="font-size: 11px; line-height: 1; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
+                {{ job.scheduledDate ? job.scheduledDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '' }}
+              </div>
+              <div class="truncate font-bold text-white" style="font-size: 11px; line-height: 1.1; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
+                {{ job.title }}
+              </div>
             </div>
-            <div v-if="day.jobs.length > 2" class="text-xs text-gray-500">
+            <div v-if="day.jobs.length > 2" class="text-xs text-white font-bold bg-gray-700 rounded px-1" style="text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
               +{{ day.jobs.length - 2 }} mais
             </div>
           </div>
@@ -158,15 +206,31 @@ onMounted(() => {
           class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
         >
           <div>
-            <div class="font-medium text-gray-900">{{ job.title }}</div>
-            <div class="text-sm text-gray-600">{{ job.location }}</div>
+            <div class="font-bold text-gray-900 text-base">{{ job.title }}</div>
+            <div class="text-sm text-gray-700 font-medium">{{ job.location }}</div>
+            <div v-if="job.scheduledDate" class="text-sm text-gray-900 font-bold">
+              📅 {{ job.scheduledDate.toLocaleDateString('pt-PT', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric'
+              }) }} às {{ job.scheduledDate.toLocaleTimeString('pt-PT', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              }) }}
+            </div>
           </div>
           <div class="text-right">
             <div :class="[
-              'text-xs px-2 py-1 rounded-full',
-              job.status === 'accepted' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-            ]">
-              {{ job.status === 'accepted' ? 'Agendado' : 'Em Andamento' }}
+              'text-xs px-3 py-1 rounded-full font-black text-white',
+              job.status === 'pending' ? 'bg-yellow-600' :
+              job.status === 'accepted' ? 'bg-blue-800' : 
+              job.status === 'in_progress' ? 'bg-green-800' : 'bg-gray-800'
+            ]" style="font-weight: 900; letter-spacing: 0.5px;">
+              {{ 
+                job.status === 'pending' ? 'PENDENTE' :
+                job.status === 'accepted' ? 'AGENDADO' : 
+                job.status === 'in_progress' ? 'EM ANDAMENTO' : 'DESCONHECIDO'
+              }}
             </div>
           </div>
         </div>

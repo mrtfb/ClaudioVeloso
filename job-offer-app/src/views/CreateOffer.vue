@@ -16,7 +16,13 @@ const form = reactive({
   description: '',
   location: '',
   duration: 1,
-  payment: 0
+  payment: 0,
+  scheduledDate: (() => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    return tomorrow.toISOString().split('T')[0]
+  })(),
+  scheduledTime: '09:00'
 })
 
 function validateForm(): boolean {
@@ -42,6 +48,22 @@ function validateForm(): boolean {
     errors.value.payment = 'Pagamento deve ser maior que 0'
   }
   
+  if (!form.scheduledDate) {
+    errors.value.scheduledDate = 'Data é obrigatória'
+  }
+  
+  if (!form.scheduledTime) {
+    errors.value.scheduledTime = 'Hora é obrigatória'
+  }
+  
+  // Validate that the scheduled date/time is in the future
+  if (form.scheduledDate && form.scheduledTime) {
+    const scheduledDateTime = new Date(`${form.scheduledDate}T${form.scheduledTime}`)
+    if (scheduledDateTime <= new Date()) {
+      errors.value.scheduledDate = 'Data e hora devem ser no futuro'
+    }
+  }
+  
   return Object.keys(errors.value).length === 0
 }
 
@@ -53,6 +75,9 @@ async function submitOffer() {
   loading.value = true
   
   try {
+    // Combine date and time into a single Date object
+    const scheduledDateTime = new Date(`${form.scheduledDate}T${form.scheduledTime}`)
+    
     jobStore.addJob({
       title: form.title,
       description: form.description,
@@ -60,7 +85,8 @@ async function submitOffer() {
       duration: form.duration,
       payment: form.payment,
       status: 'pending',
-      clientId: authStore.user.id
+      clientId: authStore.user.id,
+      scheduledDate: scheduledDateTime
     })
     
     // Reset form
@@ -69,7 +95,13 @@ async function submitOffer() {
       description: '',
       location: '',
       duration: 1,
-      payment: 0
+      payment: 0,
+      scheduledDate: (() => {
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        return tomorrow.toISOString().split('T')[0]
+      })(),
+      scheduledTime: '09:00'
     })
     
     // Navigate back to dashboard
@@ -159,6 +191,34 @@ async function submitOffer() {
         </div>
       </div>
 
+      <!-- Scheduled Date and Time -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label for="scheduledDate" class="form-label">Data Agendada *</label>
+          <input
+            id="scheduledDate"
+            v-model="form.scheduledDate"
+            type="date"
+            class="form-input"
+            :class="{ 'border-red-500': errors.scheduledDate }"
+            :min="new Date().toISOString().split('T')[0]"
+          />
+          <p v-if="errors.scheduledDate" class="text-red-500 text-sm mt-1">{{ errors.scheduledDate }}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="scheduledTime" class="form-label">Hora Agendada *</label>
+          <input
+            id="scheduledTime"
+            v-model="form.scheduledTime"
+            type="time"
+            class="form-input"
+            :class="{ 'border-red-500': errors.scheduledTime }"
+          />
+          <p v-if="errors.scheduledTime" class="text-red-500 text-sm mt-1">{{ errors.scheduledTime }}</p>
+        </div>
+      </div>
+
       <!-- Summary Card -->
       <div class="card bg-blue-50 border-blue-200">
         <h3 class="text-lg font-semibold text-blue-900 mb-3">Resumo da Oferta</h3>
@@ -172,6 +232,18 @@ async function submitOffer() {
           <div class="flex justify-between">
             <span class="text-blue-700">Valor total:</span>
             <span class="font-bold text-blue-900">{{ form.payment.toFixed(2) }}€</span>
+          </div>
+          <div v-if="form.scheduledDate && form.scheduledTime" class="flex justify-between border-t border-blue-200 pt-2">
+            <span class="text-blue-700">Agendado para:</span>
+            <span class="font-medium text-blue-900">
+              {{ new Date(`${form.scheduledDate}T${form.scheduledTime}`).toLocaleDateString('pt-PT', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) }}
+            </span>
           </div>
         </div>
       </div>

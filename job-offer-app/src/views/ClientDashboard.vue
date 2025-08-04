@@ -66,7 +66,7 @@ onMounted(() => {
         </RouterLink>
       </div>
 
-      <div v-else class="space-y-4">
+      <div v-else class="jobs-list">
         <JobCard 
           v-for="job in clientJobs.slice(0, 5)" 
           :key="job.id" 
@@ -74,7 +74,7 @@ onMounted(() => {
           :show-client-actions="true"
         />
         
-        <div v-if="clientJobs.length > 5" class="text-center">
+        <div v-if="clientJobs.length > 5" class="text-center mt-4">
           <button class="btn btn-secondary">Ver Todas as Ofertas</button>
         </div>
       </div>
@@ -121,7 +121,9 @@ onMounted(() => {
   gap: 0.75rem;
 }
 
-.space-y-4 > * + * {
-  margin-top: 1rem;
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 </style>

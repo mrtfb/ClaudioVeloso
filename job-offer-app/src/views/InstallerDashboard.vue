@@ -96,7 +96,7 @@ onMounted(() => {
       </p>
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="jobs-list">
       <JobCard 
         v-for="job in displayedJobs" 
         :key="job.id" 
@@ -139,8 +139,10 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.space-y-4 > * + * {
-  margin-top: 1rem;
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .flex-1 {
