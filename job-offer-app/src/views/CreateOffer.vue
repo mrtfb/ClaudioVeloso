@@ -1,0 +1,253 @@
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import { useJobStore } from '../stores/jobs'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const jobStore = useJobStore()
+
+const loading = ref(false)
+const errors = ref<Record<string, string>>({})
+
+const form = reactive({
+  title: '',
+  description: '',
+  location: '',
+  duration: 1,
+  payment: 0
+})
+
+function validateForm(): boolean {
+  errors.value = {}
+  
+  if (!form.title.trim()) {
+    errors.value.title = 'Título é obrigatório'
+  }
+  
+  if (!form.description.trim()) {
+    errors.value.description = 'Descrição é obrigatória'
+  }
+  
+  if (!form.location.trim()) {
+    errors.value.location = 'Localização é obrigatória'
+  }
+  
+  if (form.duration < 1) {
+    errors.value.duration = 'Duração deve ser pelo menos 1 hora'
+  }
+  
+  if (form.payment <= 0) {
+    errors.value.payment = 'Pagamento deve ser maior que 0'
+  }
+  
+  return Object.keys(errors.value).length === 0
+}
+
+async function submitOffer() {
+  if (!validateForm() || !authStore.user?.id) {
+    return
+  }
+  
+  loading.value = true
+  
+  try {
+    jobStore.addJob({
+      title: form.title,
+      description: form.description,
+      location: form.location,
+      duration: form.duration,
+      payment: form.payment,
+      status: 'pending',
+      clientId: authStore.user.id
+    })
+    
+    // Reset form
+    Object.assign(form, {
+      title: '',
+      description: '',
+      location: '',
+      duration: 1,
+      payment: 0
+    })
+    
+    // Navigate back to dashboard
+    router.push({ name: 'client-dashboard' })
+  } catch (error) {
+    console.error('Error creating job offer:', error)
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<template>
+  <div class="container">
+    <form @submit.prevent="submitOffer" class="space-y-6">
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title" class="form-label">Título do Trabalho *</label>
+        <input
+          id="title"
+          v-model="form.title"
+          type="text"
+          class="form-input"
+          :class="{ 'border-red-500': errors.title }"
+          placeholder="Ex: Instalação de sistema de climatização"
+        />
+        <p v-if="errors.title" class="text-red-500 text-sm mt-1">{{ errors.title }}</p>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description" class="form-label">Descrição *</label>
+        <textarea
+          id="description"
+          v-model="form.description"
+          class="form-input form-textarea"
+          :class="{ 'border-red-500': errors.description }"
+          placeholder="Descreva detalhadamente o trabalho a ser realizado..."
+          rows="4"
+        ></textarea>
+        <p v-if="errors.description" class="text-red-500 text-sm mt-1">{{ errors.description }}</p>
+      </div>
+
+      <!-- Location -->
+      <div class="form-group">
+        <label for="location" class="form-label">Localização *</label>
+        <input
+          id="location"
+          v-model="form.location"
+          type="text"
+          class="form-input"
+          :class="{ 'border-red-500': errors.location }"
+          placeholder="Ex: Lisboa, Rua da Liberdade, 123"
+        />
+        <p v-if="errors.location" class="text-red-500 text-sm mt-1">{{ errors.location }}</p>
+      </div>
+
+      <!-- Duration and Payment -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label for="duration" class="form-label">Duração (horas) *</label>
+          <input
+            id="duration"
+            v-model.number="form.duration"
+            type="number"
+            min="1"
+            max="24"
+            class="form-input"
+            :class="{ 'border-red-500': errors.duration }"
+          />
+          <p v-if="errors.duration" class="text-red-500 text-sm mt-1">{{ errors.duration }}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="payment" class="form-label">Pagamento (€) *</label>
+          <input
+            id="payment"
+            v-model.number="form.payment"
+            type="number"
+            min="0"
+            step="0.01"
+            class="form-input"
+            :class="{ 'border-red-500': errors.payment }"
+            placeholder="0.00"
+          />
+          <p v-if="errors.payment" class="text-red-500 text-sm mt-1">{{ errors.payment }}</p>
+        </div>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="card bg-blue-50 border-blue-200">
+        <h3 class="text-lg font-semibold text-blue-900 mb-3">Resumo da Oferta</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-blue-700">Valor por hora:</span>
+            <span class="font-medium text-blue-900">
+              {{ form.duration > 0 ? (form.payment / form.duration).toFixed(2) : '0.00' }}€/h
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-blue-700">Valor total:</span>
+            <span class="font-bold text-blue-900">{{ form.payment.toFixed(2) }}€</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-4">
+        <button
+          type="button"
+          @click="router.back()"
+          class="btn btn-secondary flex-1"
+          :disabled="loading"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary flex-1"
+          :disabled="loading"
+        >
+          <span v-if="loading" class="flex items-center">
+            <div class="spinner mr-2"></div>
+            Criando...
+          </span>
+          <span v-else>Criar Oferta</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.border-red-500 {
+  border-color: #ef4444;
+}
+
+.text-red-500 {
+  color: #ef4444;
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+.border-blue-200 {
+  border-color: #bfdbfe;
+}
+
+.text-blue-700 {
+  color: #1d4ed8;
+}
+
+.text-blue-900 {
+  color: #1e3a8a;
+}
+</style>
