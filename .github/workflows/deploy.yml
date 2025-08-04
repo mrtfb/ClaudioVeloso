@@ -31,9 +31,15 @@ jobs:
         cd job-offer-app
         npm run build
         
+    - name: Copy built files to root
+      run: |
+        cp -r job-offer-app/dist/* .
+        
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: job-offer-app/dist
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Deploy to GitHub Pages" || exit 0
+        git push
