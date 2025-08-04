@@ -1,0 +1,25 @@
+{
+  "name": "claudioveloso",
+  "version": "1.0.0",
+  "description": "Gestão de ofertas de trabalhos com marcação",
+  "main": "index.js",
+  "scripts": {
+    "install": "cd job-offer-app && npm install",
+    "dev": "cd job-offer-app && npm run dev",
+    "build": "cd job-offer-app && npm run build",
+    "preview": "cd job-offer-app && npm run preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrtfb/ClaudioVeloso.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mrtfb/ClaudioVeloso/issues"
+  },
+  "homepage": "https://mrtfb.github.io/ClaudioVeloso"
+}
