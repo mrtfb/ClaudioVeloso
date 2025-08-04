@@ -70,13 +70,28 @@
   background-color: #dc2626;
 }
 
-/* Card component */
+/* Card component - Enhanced visibility */
 .card {
-  background: white;
+  background: white !important;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 2px solid #e5e7eb !important;
   margin-bottom: 1rem;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Enhanced visibility for interactive cards */
+.card.cursor-pointer {
+  background: white !important;
+  border: 2px solid #d1d5db !important;
+  transition: all 0.2s ease;
+}
+
+.card.cursor-pointer:hover {
+  border-color: #9ca3af !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Form styles */
@@ -299,4 +314,96 @@ a,
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
+}
+
+/* Global visibility and contrast improvements */
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+.text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.text-gray-500 {
+  color: #6b7280 !important;
+}
+
+/* Ensure all backgrounds are solid */
+.bg-white {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+  opacity: 1 !important;
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff !important;
+  opacity: 1 !important;
+}
+
+.bg-green-50 {
+  background-color: #f0fdf4 !important;
+  opacity: 1 !important;
+}
+
+/* Ensure borders are visible */
+.border {
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+.border-2 {
+  border-width: 2px !important;
+  border-style: solid !important;
+}
+
+.border-gray-200 {
+  border-color: #e5e7eb !important;
+}
+
+.border-gray-300 {
+  border-color: #d1d5db !important;
+}
+
+.border-blue-500 {
+  border-color: #3b82f6 !important;
+}
+
+.border-green-500 {
+  border-color: #22c55e !important;
+}
+
+/* Icon colors */
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.text-green-600 {
+  color: #16a34a !important;
+}
+
+.text-red-600 {
+  color: #dc2626 !important;
+}
+
+.text-yellow-600 {
+  color: #d97706 !important;
+}
+
+/* Ensure all components are visible */
+* {
+  opacity: 1 !important;
+  visibility: visible !important;
 }

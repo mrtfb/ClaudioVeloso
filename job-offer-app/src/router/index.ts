@@ -49,13 +49,13 @@ const router = createRouter({
 // Navigation guard to ensure authentication
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // Allow access to home route (user selection) even if not authenticated
   if (to.name === 'home') {
     next()
     return
   }
-  
+
   // For other routes, require authentication
   if (authStore.isAuthenticated) {
     next()

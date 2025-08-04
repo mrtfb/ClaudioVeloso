@@ -143,4 +143,35 @@ function proceed() {
 .space-y-4 > * + * {
   margin-top: 1rem;
 }
+
+/* Ensure cards are highly visible */
+.card {
+  background: white !important;
+  border: 2px solid #d1d5db !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.card:hover {
+  border-color: #9ca3af !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure text is dark and visible */
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+/* Ensure icons are visible */
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.text-green-600 {
+  color: #16a34a !important;
+}
 </style>
