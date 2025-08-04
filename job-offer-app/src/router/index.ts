@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import UserTypeSelection from '../components/UserTypeSelection.vue'
+import AppLayout from '../components/AppLayout.vue'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -7,41 +9,39 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      redirect: () => {
-        const authStore = useAuthStore()
-        if (authStore.userType === 'client') {
-          return { name: 'client-dashboard' }
-        } else if (authStore.userType === 'installer') {
-          return { name: 'installer-dashboard' }
+      component: UserTypeSelection
+    },
+    {
+      path: '/app',
+      component: AppLayout,
+      children: [
+        {
+          path: '/client',
+          name: 'client-dashboard',
+          component: () => import('../views/ClientDashboard.vue')
+        },
+        {
+          path: '/client/create-offer',
+          name: 'create-offer',
+          component: () => import('../views/CreateOffer.vue')
+        },
+        {
+          path: '/installer',
+          name: 'installer-dashboard',
+          component: () => import('../views/InstallerDashboard.vue')
+        },
+        {
+          path: '/calendar',
+          name: 'calendar',
+          component: () => import('../views/CalendarView.vue')
+        },
+        {
+          path: '/work/:jobId',
+          name: 'work-session',
+          component: () => import('../views/WorkSession.vue'),
+          props: true
         }
-        return { name: 'client-dashboard' }
-      }
-    },
-    {
-      path: '/client',
-      name: 'client-dashboard',
-      component: () => import('../views/ClientDashboard.vue')
-    },
-    {
-      path: '/client/create-offer',
-      name: 'create-offer',
-      component: () => import('../views/CreateOffer.vue')
-    },
-    {
-      path: '/installer',
-      name: 'installer-dashboard',
-      component: () => import('../views/InstallerDashboard.vue')
-    },
-    {
-      path: '/calendar',
-      name: 'calendar',
-      component: () => import('../views/CalendarView.vue')
-    },
-    {
-      path: '/work/:jobId',
-      name: 'work-session',
-      component: () => import('../views/WorkSession.vue'),
-      props: true
+      ]
     }
   ]
 })
@@ -50,12 +50,18 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   
-  // Allow access if authenticated
+  // Allow access to home route (user selection) even if not authenticated
+  if (to.name === 'home') {
+    next()
+    return
+  }
+  
+  // For other routes, require authentication
   if (authStore.isAuthenticated) {
     next()
   } else {
-    // If not authenticated, stay on the current route (will show user selection)
-    next(false)
+    // If not authenticated, redirect to home
+    next({ name: 'home' })
   }
 })
 

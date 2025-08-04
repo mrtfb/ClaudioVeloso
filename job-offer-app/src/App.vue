@@ -2,8 +2,6 @@
 import { onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 import { useJobStore } from './stores/jobs'
-import UserTypeSelection from './components/UserTypeSelection.vue'
-import AppLayout from './components/AppLayout.vue'
 
 const authStore = useAuthStore()
 const jobStore = useJobStore()
@@ -16,11 +14,7 @@ onMounted(() => {
 
 <template>
   <div id="app">
-    <!-- Show user type selection if not authenticated -->
-    <UserTypeSelection v-if="!authStore.isAuthenticated" />
-    
-    <!-- Show main app layout if authenticated -->
-    <AppLayout v-else />
+    <router-view />
   </div>
 </template>
 

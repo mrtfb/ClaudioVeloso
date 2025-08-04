@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore, type UserType } from '../stores/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const selectedType = ref<UserType>(null)
 
 function selectUserType(type: UserType) {
@@ -19,6 +21,13 @@ function proceed() {
       type: selectedType.value
     }
     authStore.setUser(mockUser)
+    
+    // Navigate to the appropriate dashboard
+    if (selectedType.value === 'client') {
+      router.push('/client')
+    } else if (selectedType.value === 'installer') {
+      router.push('/installer')
+    }
   }
 }
 </script>
