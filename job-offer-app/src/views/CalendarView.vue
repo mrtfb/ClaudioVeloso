@@ -168,19 +168,25 @@ onMounted(() => {
             <div 
               v-for="job in day.jobs.slice(0, 2)" 
               :key="job.id"
-              :class="[
-                'text-xs p-1 rounded font-bold',
-                job.status === 'pending' ? 'bg-yellow-500' : 
-                job.status === 'accepted' ? 'bg-blue-700' : 
-                job.status === 'in_progress' ? 'bg-green-700' : 'bg-gray-700'
-              ]"
-              :title="`${job.title} - ${job.scheduledDate ? job.scheduledDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''}`"
+              class="rounded-2xl p-3 shadow-lg border-2"
+              :style="{
+                backgroundColor: job.status === 'pending' ? '#fde047' : 
+                                job.status === 'accepted' ? '#93c5fd' : 
+                                job.status === 'in_progress' ? '#86efac' : '#d1d5db',
+                borderColor: job.status === 'pending' ? '#facc15' : 
+                            job.status === 'accepted' ? '#60a5fa' : 
+                            job.status === 'in_progress' ? '#4ade80' : '#9ca3af',
+                color: 'black',
+                fontSize: '11px',
+                lineHeight: '1.3',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)'
+              }"
             >
-              <div class="font-black text-white" style="font-size: 11px; line-height: 1; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
-                {{ job.scheduledDate ? job.scheduledDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '' }}
-              </div>
-              <div class="truncate font-bold text-white" style="font-size: 11px; line-height: 1.1; text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
+              <div class="font-bold truncate text-center mb-1" style="line-height: 1.2;">
                 {{ job.title }}
+              </div>
+              <div class="truncate text-center text-xs opacity-75" style="line-height: 1.1;">
+                {{ job.scheduledDate ? job.scheduledDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '' }}
               </div>
             </div>
             <div v-if="day.jobs.length > 2" class="text-xs text-white font-bold bg-gray-700 rounded px-1" style="text-shadow: 1px 1px 1px rgba(0,0,0,0.5);">
@@ -203,11 +209,20 @@ onMounted(() => {
         <div 
           v-for="job in scheduledJobs.slice(0, 5)" 
           :key="job.id"
-          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          class="flex items-center justify-between p-3 rounded-lg border-2 shadow-md"
+          :style="{
+            backgroundColor: job.status === 'pending' ? '#fde047' : 
+                            job.status === 'accepted' ? '#93c5fd' : 
+                            job.status === 'in_progress' ? '#86efac' : '#d1d5db',
+            borderColor: job.status === 'pending' ? '#facc15' : 
+                        job.status === 'accepted' ? '#60a5fa' : 
+                        job.status === 'in_progress' ? '#4ade80' : '#9ca3af',
+            color: 'black'
+          }"
         >
           <div>
             <div class="font-bold text-gray-900 text-base">{{ job.title }}</div>
-            <div class="text-sm text-gray-700 font-medium">{{ job.location }}</div>
+            <div class="text-sm text-gray-800 font-medium">{{ job.location }}</div>
             <div v-if="job.scheduledDate" class="text-sm text-gray-900 font-bold">
               📅 {{ job.scheduledDate.toLocaleDateString('pt-PT', { 
                 day: '2-digit', 
@@ -220,12 +235,8 @@ onMounted(() => {
             </div>
           </div>
           <div class="text-right">
-            <div :class="[
-              'text-xs px-3 py-1 rounded-full font-black text-white',
-              job.status === 'pending' ? 'bg-yellow-600' :
-              job.status === 'accepted' ? 'bg-blue-800' : 
-              job.status === 'in_progress' ? 'bg-green-800' : 'bg-gray-800'
-            ]" style="font-weight: 900; letter-spacing: 0.5px;">
+            <div class="text-xs px-3 py-1 rounded-full font-black"
+                 style="font-weight: 900; letter-spacing: 0.5px; color: black;">
               {{ 
                 job.status === 'pending' ? 'PENDENTE' :
                 job.status === 'accepted' ? 'AGENDADO' : 
