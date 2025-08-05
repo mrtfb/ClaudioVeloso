@@ -120,7 +120,7 @@ onMounted(() => {
           </svg>
         </button>
         
-        <h2 class="text-xl font-semibold text-gray-900 capitalize">{{ currentMonth }} - UPDATED VERSION</h2>
+        <h2 class="text-xl font-semibold text-gray-900 capitalize">{{ currentMonth }}</h2>
         
         <button @click="nextMonth" class="p-2 hover:bg-gray-100 rounded-lg">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
